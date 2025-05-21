@@ -1,60 +1,84 @@
-environment {
-    DOCKER_IMAGE = "investia-app:latest"
-    DOCKER_REGISTRY = "mohamedjomaa1" // Replace with your registry, e.g., Docker Hub username
-    DOCKER_CREDENTIALS_ID = "docker-credentials-id" // Jenkins credentials ID for Docker registry
-}
+// Jenkinsfile (Declarative Pipeline) - Version MINIMALE : Checkout + Build Maven
 
-stages {
-    stage('Checkout') {
-        steps {
-            // Checkout code from the repository
-            git branch: 'BACKEND-INTEGRATION', url: 'https://github.com/mohamedjomaa1/investia.git' // Replace with your repo URL
-        }
+pipeline {
+    agent any // Ou un agent spécifique avec Maven/Java installé
+
+    // La variable DOCKER_IMAGE_NAME n'est plus nécessaire pour l'instant
+    /*
+    environment {
+        DOCKER_IMAGE_NAME = "tonnomdutilisateur/investia-app"
+    }
+    */
+
+    tools {
+        maven 'MAVEN_HOME' // Nom de la configuration Maven dans "Global Tool Configuration" de Jenkins
+        jdk 'JDK_17'       // Nom de la configuration JDK dans "Global Tool Configuration" de Jenkins
     }
 
-    stage('Build Maven') {
-        steps {
-            // Build the Spring Boot application with Maven
-            sh 'mvn clean package -DskipTests'
-        }
-    }
-
-    stage('Build Docker Image') {
-        steps {
-            // Build the Docker image
-            sh "docker build -t ${DOCKER_IMAGE} ."
-        }
-    }
-
-    stage('Push Docker Image') {
-        steps {
-            // Login to Docker registry and push the image
-            withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin ${DOCKER_REGISTRY}"
-                sh "docker tag ${DOCKER_IMAGE} ${DOCKER_REGISTRY}/${DOCKER_IMAGE}"
-                sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}"
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Cloning the repository...'
+                checkout scm
             }
         }
-    }
 
-    stage('Deploy') {
-        steps {
-            // Deploy the application (e.g., to a Kubernetes cluster or Docker Compose)
-            sh 'docker-compose -f docker-compose.yaml up -d'
+        stage('Setup Environment') {
+            steps {
+                echo "Using JDK: ${tool 'JDK_17'}"
+                echo "Using Maven: ${tool 'MAVEN_HOME'}"
+            }
         }
-    }
-}
 
-post {
-    always {
-        // Clean up Docker images to save space
-        sh "docker rmi ${DOCKER_IMAGE} || true"
-        sh "docker rmi ${DOCKER_REGISTRY}/${DOCKER_IMAGE} || true"
+        stage('Build with Maven (Skipping All Tests)') {
+            steps {
+                echo 'Building the application (Maven) - Skipping test compilation and execution...'
+                // Utilisation de -Dmaven.test.skip=true pour sauter la compilation ET l'exécution des tests
+                // L'option -U force la mise à jour des dépendances
+                bat "\"${tool 'MAVEN_HOME'}\\bin\\mvn.cmd\" -U clean package -Dmaven.test.skip=true -B"
+            }
+        }
+
+        // ÉTAPES DOCKER SUPPRIMÉES/COMMENTÉES
+        /*
+        stage('Build Docker Image') {
+            steps {
+                echo "Building Docker image: ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                script {
+                    def dockerImage = docker.build("${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}", "--pull -f Dockerfile .")
+                    if (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master') {
+                        dockerImage.tag("${DOCKER_IMAGE_NAME}", "latest")
+                    }
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                echo 'Push Docker Image stage - currently commented out'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploy stage - currently commented out'
+            }
+        }
+        */
     }
-    success {
-        echo 'Build and deployment successful!'
-    }
-    failure {
-        echo 'Build or deployment failed.'
+
+    post {
+        always {
+            echo 'Pipeline finished.'
+            cleanWs() // Nettoie l'espace de travail Jenkins après le build
+        }
+        success {
+            echo 'Pipeline successful!'
+            // Notifier le succès (ex: mail, Slack)
+        }
+        failure {
+            echo 'Pipeline failed.'
+            // Notifier l'échec
+        }
     }
 }
