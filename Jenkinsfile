@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_REGISTRY = 'https://hub.docker.com/repository/docker/mohamedjomaa1'  // Change to your registry
         DOCKER_USER='mohamedjomaa1'
-        DOCKER_PASS=''
+        DOCKER_PASS='num55842453'
         BACKEND_IMAGE = 'investia-backend'
         SONAR_PROJECT_KEY = 'jenkins-cicd'
         SONAR_HOST_URL = 'http://localhost:9000'
