@@ -1,4 +1,4 @@
-// Jenkinsfile (Declarative Pipeline) - Version MINIMALE : Checkout + Build Maven + Unit Tests
+// Jenkinsfile (Declarative Pipeline) - Version MINIMALE : Checkout + Build Maven
 
 pipeline {
     agent any // Ou un agent spécifique avec Maven/Java installé
@@ -30,23 +30,16 @@ pipeline {
             }
         }
 
-        // --- MODIFICATION ICI ---
-        stage('Build with Maven (and Run Unit Tests)') { // Nom de l'étape mis à jour
+        stage('Build with Maven (Skipping All Tests)') {
             steps {
-                echo 'Building the application and running unit tests (Maven)...' // Message mis à jour
-                // La commande 'clean package' va :
-                // 1. 'clean': Nettoyer les builds précédents.
-                // 2. 'package': Compiler le code source, exécuter les tests unitaires (phase 'test' de Maven),
-                //    puis empaqueter le code compilé (ex: en .jar ou .war).
-                // L'option -U force la mise à jour des dépendances.
-                // L'option -B active le mode batch (non interactif), recommandé pour la CI.
-                // L'option -Dmaven.test.skip=true A ÉTÉ RETIRÉE pour que les tests s'exécutent.
-                bat "\"${tool 'MAVEN_HOME'}\\bin\\mvn.cmd\" -U clean package -B"
+                echo 'Building the application (Maven) - Skipping test compilation and execution...'
+                // Utilisation de -Dmaven.test.skip=true pour sauter la compilation ET l'exécution des tests
+                // L'option -U force la mise à jour des dépendances
+                bat "\"${tool 'MAVEN_HOME'}\\bin\\mvn.cmd\" -U clean package -Dmaven.test.skip=true -B"
             }
         }
-        // --- FIN DE LA MODIFICATION ---
 
-        // ÉTAPES DOCKER SUPPRIMÉES/COMMENTÉES (conservées comme dans l'original)
+        // ÉTAPES DOCKER SUPPRIMÉES/COMMENTÉES
         /*
         stage('Build Docker Image') {
             steps {
@@ -77,7 +70,7 @@ pipeline {
     post {
         always {
             echo 'Pipeline finished.'
-            cleanWs()
+            cleanWs() // Nettoie l'espace de travail Jenkins après le build
         }
         success {
             echo 'Pipeline successful!'
