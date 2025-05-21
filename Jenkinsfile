@@ -6,13 +6,13 @@ pipeline {
         DOCKER_USER='mohamedjomaa1'
         DOCKER_PASS='num55842453'
         BACKEND_IMAGE = 'investia-backend'
-        SONAR_PROJECT_KEY = 'jenkins-cicd'
+       /* SONAR_PROJECT_KEY = 'jenkins-cicd'
         SONAR_HOST_URL = 'http://localhost:9000'
-        SONAR_TOKEN = credentials('sonartoken')
+        SONAR_TOKEN = credentials('sonartoken')*/
         DOCKER_TAG = 'latest'
-        REMOTE_USER = "ec2-user"
+       /* REMOTE_USER = "ec2-user"
         REMOTE_HOST = "3.88.166.52"
-        REMOTE_DIR  = "/home/ec2-user/devops"
+        REMOTE_DIR  = "/home/ec2-user/devops"*/
     }
     tools{
         maven 'maven'
@@ -26,30 +26,29 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
+     /*   stage('SonarQube Analysis') {
             steps {
                 script {
-                    //withSonarQubeEnv('SonarQube') {
+                    withSonarQubeEnv('SonarQube') {
                        dir('investia-backend'){
-                        //sh 'mvn compile'
-                        //sh 'mvn test'
+                        sh 'mvn compile'
+                        sh 'mvn test'
                         sh 'mvn sonar:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN'
                         }
-                    //}
+                    }
                 }
             }
-        } */
-        
+        }*/
+
         stage('Unit Tests') {
             steps {
                 dir('investia-backend') {
                     sh 'mvn test'
                 }
             }
-        } 
-        
-  
-        
+        }
+
+
          stage('Build Docker Images') {
             steps {
                 
@@ -74,7 +73,7 @@ pipeline {
         }
         
 
-       stage('Deploy with Docker Compose') {
+  /*     stage('Deploy with Docker Compose') {
             steps {
                 script{
                     sshagent(credentials:['ssh-secret']) {
@@ -90,7 +89,7 @@ pipeline {
                 }
             }
         }
-    }
+    }*/
 
     post {
         success {
