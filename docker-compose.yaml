@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  app:
+    image: investia-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8089:8089"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/investiaDB?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - COINGECKO_BASE_URL=https://api.coingecko.com/api/v3
+      - STRIPE_KEY_PUBLIC=your_stripe_public_key
+      - STRIPE_KEY_SECRET=your_stripe_secret_key
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_DATABASE=investiaDB
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db-data:
