@@ -1,102 +1,91 @@
-pipeline {
-    agent any
+// Jenkinsfile (Declarative Pipeline) - Version MINIMALE : Checkout + Build Maven + Unit Tests
 
+pipeline {
+    agent any // Ou un agent spécifique avec Maven/Java installé
+
+    // La variable DOCKER_IMAGE_NAME n'est plus nécessaire pour l'instant
+    /*
     environment {
-        DOCKER_REGISTRY = 'https://hub.docker.com/repository/docker/mohamedjomaa1'  // Change to your registry
-        DOCKER_USER='mohamedjomaa1'
-        DOCKER_PASS='num55842453'
-        BACKEND_IMAGE = 'investia-backend'
-       /* SONAR_PROJECT_KEY = 'jenkins-cicd'
-        SONAR_HOST_URL = 'http://localhost:9000'
-        SONAR_TOKEN = credentials('sonartoken')*/
-        DOCKER_TAG = 'latest'
-       /* REMOTE_USER = "ec2-user"
-        REMOTE_HOST = "3.88.166.52"
-        REMOTE_DIR  = "/home/ec2-user/devops"*/
+        DOCKER_IMAGE_NAME = "tonnomdutilisateur/investia-app"
     }
-    tools{
-        maven 'maven'
-       
+    */
+
+    tools {
+        maven 'MAVEN_HOME' // Nom de la configuration Maven dans "Global Tool Configuration" de Jenkins
+        jdk 'JDK_17'       // Nom de la configuration JDK dans "Global Tool Configuration" de Jenkins
     }
 
     stages {
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                git branch: 'master', url:'https://github.com/mohamedjomaa1/Investia-devops.git'
+                echo 'Cloning the repository...'
+                checkout scm
             }
         }
 
-     /*   stage('SonarQube Analysis') {
+        stage('Setup Environment') {
             steps {
+                echo "Using JDK: ${tool 'JDK_17'}"
+                echo "Using Maven: ${tool 'MAVEN_HOME'}"
+            }
+        }
+
+        // --- MODIFICATION ICI ---
+        stage('Build with Maven (and Run Unit Tests)') { // Nom de l'étape mis à jour
+            steps {
+                echo 'Building the application and running unit tests (Maven)...' // Message mis à jour
+                // La commande 'clean package' va :
+                // 1. 'clean': Nettoyer les builds précédents.
+                // 2. 'package': Compiler le code source, exécuter les tests unitaires (phase 'test' de Maven),
+                //    puis empaqueter le code compilé (ex: en .jar ou .war).
+                // L'option -U force la mise à jour des dépendances.
+                // L'option -B active le mode batch (non interactif), recommandé pour la CI.
+                // L'option -Dmaven.test.skip=true A ÉTÉ RETIRÉE pour que les tests s'exécutent.
+                bat "\"${tool 'MAVEN_HOME'}\\bin\\mvn.cmd\" -U clean package -B"
+            }
+        }
+        // --- FIN DE LA MODIFICATION ---
+
+        // ÉTAPES DOCKER SUPPRIMÉES/COMMENTÉES (conservées comme dans l'original)
+        /*
+        stage('Build Docker Image') {
+            steps {
+                echo "Building Docker image: ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
                 script {
-                    withSonarQubeEnv('SonarQube') {
-                       dir('investia-backend'){
-                        sh 'mvn compile'
-                        sh 'mvn test'
-                        sh 'mvn sonar:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN'
-                        }
-                    }
-                }
-            }
-        }*/
-
-        stage('Unit Tests') {
-            steps {
-                dir('investia-backend') {
-                    sh 'mvn test'
-                }
-            }
-        }
-
-
-         stage('Build Docker Images') {
-            steps {
-                
-                dir('investia-backend') {
-                    sh "docker build -t ${BACKEND_IMAGE}:${DOCKER_TAG} ."
-                }
-                
-            }
-        }
-       
-        stage('Push to Docker Hub') {
-            steps {
-                script{
-                   sh ' echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin'
-
-                   sh 'docker tag ${BACKEND_IMAGE}:${DOCKER_TAG} mohamedjomaa1/investia-backend'
-                   sh ' docker push mohamedjomaa1/investia-backend'
-                   
-                   
-                    }
-            }
-        }
-        
-
-  /*     stage('Deploy with Docker Compose') {
-            steps {
-                script{
-                    sshagent(credentials:['ssh-secret']) {
-                         sh """
-                        ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} << EOF
-                            cd ${REMOTE_DIR}
-                            docker-compose pull
-                            docker-compose up -d --remove-orphans
-                            docker system prune   
-                            EOF 
-                        """
+                    def dockerImage = docker.build("${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}", "--pull -f Dockerfile .")
+                    if (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master') {
+                        dockerImage.tag("${DOCKER_IMAGE_NAME}", "latest")
                     }
                 }
             }
         }
-    }*/
+
+        stage('Push Docker Image') {
+            steps {
+                echo 'Push Docker Image stage - currently commented out'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploy stage - currently commented out'
+            }
+        }
+        */
+    }
 
     post {
+        always {
+            echo 'Pipeline finished.'
+            cleanWs()
+        }
         success {
-            echo 'Deployment successful!'
+            echo 'Pipeline successful!'
+            // Notifier le succès (ex: mail, Slack)
         }
         failure {
-            echo 'Deployment failed!'
+            echo 'Pipeline failed.'
+            // Notifier l'échec
         }
     }
 }
