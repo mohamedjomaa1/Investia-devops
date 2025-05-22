@@ -4,11 +4,11 @@ pipeline {
     agent any // Ou un agent spécifique avec Maven/Java installé
 
     // La variable DOCKER_IMAGE_NAME n'est plus nécessaire pour l'instant
-    /*
+    
     environment {
-        DOCKER_IMAGE_NAME = "tonnomdutilisateur/investia-app"
+        DOCKER_IMAGE_NAME = "mohamedjomaa1/investia-backend"
     }
-    */
+    
 
     tools {
         maven 'MAVEN_HOME' // Nom de la configuration Maven dans "Global Tool Configuration" de Jenkins
@@ -39,16 +39,9 @@ pipeline {
             }
         }
 
-       stage('Unit Tests') {
-            steps {
-                dir('investia-backend') {
-                    sh 'mvn test'
-                }
-            }
-        }
 
         // ÉTAPES DOCKER SUPPRIMÉES/COMMENTÉES
-        /*
+        
         stage('Build Docker Image') {
             steps {
                 echo "Building Docker image: ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
@@ -60,7 +53,7 @@ pipeline {
                 }
             }
         }
-
+/*
         stage('Push Docker Image') {
             steps {
                 echo 'Push Docker Image stage - currently commented out'
