@@ -14,13 +14,13 @@ pipeline {
         maven 'MAVEN_HOME' // Nom de la configuration Maven dans "Global Tool Configuration" de Jenkins
         jdk 'JDK_17'       // Nom de la configuration JDK dans "Global Tool Configuration" de Jenkins
     }
-    
-    options {
+
+  /*  options {
         timestamps() // Add timestamps to console output
         ansiColor('xterm') // Enable colored output
         preserveStashes() // Preserve stashes for multi-stage builds
         buildDiscarder(logRotator(numToKeepStr: '10')) // Keep last 10 builds
-    }
+    } */
 
     stages {
         stage('Checkout') {
