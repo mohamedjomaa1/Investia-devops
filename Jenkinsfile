@@ -20,6 +20,7 @@ pipeline {
             steps {
                 echo 'Cloning the repository...'
                 checkout scm
+                bat 'dir'
             }
         }
 
@@ -67,12 +68,12 @@ pipeline {
         }
         */
         stage('Unit Tests') {
-            steps {
-                dir('investia-backend') {
-                    sh 'mvn test'
-                }
-            }
+    steps {
+        dir('investia-backend') {
+            bat "\"${tool 'MAVEN_HOME'}\\bin\\mvn.cmd\" test"
         }
+    }
+}
 
     }
 
