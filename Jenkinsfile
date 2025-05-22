@@ -50,8 +50,22 @@ pipeline {
 
 
         // ÉTAPES DOCKER SUPPRIMÉES/COMMENTÉES
-        
+
+
         stage('Build Docker Image') {
+            steps {
+                echo "Building Docker image: ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                script {
+                    // Ensure Docker Pipeline plugin is installed for 'docker' variable
+                    def dockerImage = docker.build("${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}", "--pull -f Dockerfile .")
+                    if (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master') {
+                        dockerImage.tag("${DOCKER_IMAGE_NAME}:latest")
+                    }
+                }
+            }
+        }
+        
+    /*    stage('Build Docker Image') {
             steps {
                 echo "Building Docker image: ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
                 script {
@@ -61,7 +75,7 @@ pipeline {
                     }
                 }
             }
-        }
+        } */
 /*
         stage('Push Docker Image') {
             steps {
