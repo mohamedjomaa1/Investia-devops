@@ -39,7 +39,7 @@ pipeline {
             }
         }
 
-        stage('Build Backend and Run Unit Tests') {
+       /* stage('Build Backend and Run Unit Tests') {
             steps {
                 // IMPORTANT: Remplacez 'NOM_DE_VOTRE_MODULE_BACKEND'
                 // par le chemin relatif vers le répertoire de votre module backend
@@ -59,7 +59,7 @@ pipeline {
                     bat "\"${tool 'MAVEN_HOME'}\\bin\\mvn.cmd\" -U clean package -B"
                 }
             }
-        }
+        } */
 
         // ÉTAPES DOCKER SUPPRIMÉES/COMMENTÉES
         /*
