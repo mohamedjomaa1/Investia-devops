@@ -39,6 +39,28 @@ pipeline {
             }
         }
 
+        stage('Build Backend and Run Unit Tests') {
+            steps {
+                // IMPORTANT: Remplacez 'NOM_DE_VOTRE_MODULE_BACKEND'
+                // par le chemin relatif vers le répertoire de votre module backend
+                // (celui qui contient le pom.xml du backend).
+                // Par exemple: 'my-project-backend' ou 'services/backend-service'
+                dir('INVESTIA') {
+                    echo "Switched to backend directory: $(pwd)" // Affiche le répertoire courant (Windows: use 'cd')
+                    echo 'Building the backend application and running unit tests (Maven)...'
+
+                    // La commande 'clean package' va :
+                    // 1. 'clean': Nettoyer les builds précédents.
+                    // 2. 'package': Compiler le code source, exécuter les tests unitaires (phase 'test' de Maven),
+                    //    puis empaqueter le code compilé (ex: en .jar ou .war).
+                    // L'option -U force la mise à jour des dépendances.
+                    // L'option -B active le mode batch (non interactif), recommandé pour la CI.
+                    // L'option -Dmaven.test.skip=true A ÉTÉ RETIRÉE pour que les tests s'exécutent.
+                    bat "\"${tool 'MAVEN_HOME'}\\bin\\mvn.cmd\" -U clean package -B"
+                }
+            }
+        }
+
         // ÉTAPES DOCKER SUPPRIMÉES/COMMENTÉES
         /*
         stage('Build Docker Image') {
