@@ -41,7 +41,7 @@ pipeline {
 
        stage('Unit Tests') {
             steps {
-                dir('mohamedjomaa1/investia-backend') {
+                dir('investia-backend') {
                     sh 'mvn test'
                 }
             }
