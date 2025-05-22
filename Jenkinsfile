@@ -52,7 +52,7 @@ pipeline {
         // ÉTAPES DOCKER SUPPRIMÉES/COMMENTÉES
 
 
-        stage('Build Docker Image') {
+     /*   stage('Build Docker Image') {
             steps {
                 echo "Building Docker image: ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
                 script {
@@ -63,7 +63,7 @@ pipeline {
                     }
                 }
             }
-        }
+        } */
         
     /*    stage('Build Docker Image') {
             steps {
